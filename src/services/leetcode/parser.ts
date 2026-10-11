@@ -100,6 +100,7 @@ function parseSimilar(raw: string | null | undefined): string[] {
 
 /** Splits LeetCode content HTML into statement / examples / constraints / follow-ups / images. */
 export function parseContentHtml(contentHtml: string) {
+  const widths = imageWidths(contentHtml);
   const sanitized = sanitizeStatementHtml(contentHtml);
   const doc = parseDocument(sanitized);
 
@@ -116,13 +117,22 @@ export function parseContentHtml(contentHtml: string) {
     followBuf = "";
   };
 
+  const toImage = (img: Element): ProblemImage => {
+    const width = widths.get(img.attribs.src);
+    return { url: img.attribs.src, alt: (img.attribs.alt ?? "").slice(0, 300), ...(width ? { width } : {}) };
+  };
+  // Images seen after an "Example N:" heading and before its Input/Output block.
+  let pendingImages: ProblemImage[] = [];
+
   for (const node of doc.children) {
     const text = clean(nodeText(node));
-    if (!text && !(isElement(node) && node.name === "img")) continue;
+    const nodeImages = imagesIn(node).map(toImage);
+    if (!text && nodeImages.length === 0) continue;
 
     if (/^Example\s*\d*\s*:?$/i.test(text)) {
       if (section === "followup") flushFollow();
       section = "examples";
+      pendingImages = nodeImages;
       continue;
     }
     if (/^Constraints\s*:?/i.test(text)) {
@@ -144,8 +154,14 @@ export function parseContentHtml(contentHtml: string) {
         statementNodes.push(node);
         break;
       case "examples": {
-        const ex = parseExampleText(text);
-        if (ex) examples.push(ex);
+        const ex = text ? parseExampleText(text) : null;
+        if (ex) {
+          // Older layout: <img> between heading and <pre>. Newer layout: <img> inside the example-block.
+          examples.push({ ...ex, images: [...pendingImages, ...nodeImages].slice(0, 10) });
+          pendingImages = [];
+        } else {
+          pendingImages.push(...nodeImages);
+        }
         break;
       }
       case "constraints":
@@ -176,7 +192,7 @@ export function parseContentHtml(contentHtml: string) {
       const src = n.attribs.src ?? "";
       if (isAllowedImageUrl(src) && !seen.has(src)) {
         seen.add(src);
-        images.push({ url: src, alt: (n.attribs.alt ?? "").slice(0, 300) });
+        images.push(toImage(n));
       }
     }
     n.children.forEach(walk);
@@ -197,6 +213,30 @@ export function parseContentHtml(contentHtml: string) {
     followUps: followUps.slice(0, 20),
     images: images.slice(0, 30),
   };
+}
+
+/** Allowed <img> elements inside a node (including the node itself). */
+function imagesIn(node: AnyNode): Element[] {
+  if (!isElement(node)) return [];
+  const found: Element[] = node.name === "img" && isAllowedImageUrl(node.attribs.src ?? "") ? [node] : [];
+  for (const child of node.children) found.push(...imagesIn(child));
+  return found;
+}
+
+/** Display widths from inline styles/attributes in the raw HTML (styles are stripped by the sanitizer). */
+function imageWidths(rawHtml: string): Map<string, number> {
+  const map = new Map<string, number>();
+  const visit = (n: AnyNode) => {
+    if (!isElement(n)) return;
+    if (n.name === "img" && n.attribs.src) {
+      const fromStyle = /(?:^|;)\s*width\s*:\s*(\d+(?:\.\d+)?)px/i.exec(n.attribs.style ?? "")?.[1];
+      const w = Math.round(Number(fromStyle ?? n.attribs.width));
+      if (w > 0 && w <= 2000) map.set(n.attribs.src, w);
+    }
+    n.children.forEach(visit);
+  };
+  parseDocument(rawHtml).children.forEach(visit);
+  return map;
 }
 
 /** Converts a raw question into editable fields + the list of fields that were not found. */

@@ -20,8 +20,8 @@ describe("parseQuestion", () => {
 
   it("extracts both <pre> and example-block examples", () => {
     expect(data.examples).toEqual([
-      { input: "values = [1,4,6], goal = 10", output: "[1,2]", explanation: "values[1] + values[2] == 10." },
-      { input: "values = [5,5], goal = 10", output: "[0,1]", explanation: "" },
+      { input: "values = [1,4,6], goal = 10", output: "[1,2]", explanation: "values[1] + values[2] == 10.", images: [] },
+      { input: "values = [5,5], goal = 10", output: "[0,1]", explanation: "", images: [] },
     ]);
   });
 
@@ -38,7 +38,8 @@ describe("parseQuestion", () => {
   });
 
   it("collects allowed images with alt text", () => {
-    expect(data.images).toEqual([{ url: "https://assets.leetcode.com/uploads/mock/diagram.png", alt: "Diagram of the array" }]);
+    expect(data.images).toEqual([{ url: "https://assets.leetcode.com/uploads/mock/diagram.png", alt: "Diagram of the array", width: 200 }]);
+    expect(data.statement).toContain("https://assets.leetcode.com/uploads/mock/diagram.png");
   });
 
   it("reports only genuinely missing fields", () => {
@@ -52,6 +53,44 @@ describe("parseQuestion", () => {
       expect.arrayContaining(["problemNumber", "difficulty", "examples", "constraints", "topics", "followUps", "images"]),
     );
     expect(r.missingFields).not.toContain("statement");
+  });
+});
+
+describe("example images", () => {
+  const img = (name: string, w: number) =>
+    `<img alt="" src="https://assets.leetcode.com/uploads/${name}.png" style="width: ${w}px; height: 90px; margin-top: 8px;" />`;
+
+  it("attaches an image placed between the heading and <pre> to that example", () => {
+    const html = [
+      "<p>Detect a loop in the chain.</p>",
+      '<p><strong class="example">Example 1:</strong></p>',
+      img("loop-a", 300),
+      "<pre>\n<strong>Input:</strong> nodes = [3,2,0,-4], at = 1\n<strong>Output:</strong> true\n</pre>",
+      '<p><strong class="example">Example 2:</strong></p>',
+      img("loop-b", 141),
+      "<pre>\n<strong>Input:</strong> nodes = [1,2], at = 0\n<strong>Output:</strong> true\n</pre>",
+      '<p><strong class="example">Example 3:</strong></p>',
+      "<pre>\n<strong>Input:</strong> nodes = [1], at = -1\n<strong>Output:</strong> false\n</pre>",
+      "<p><strong>Constraints:</strong></p><ul><li>n &gt;= 0</li></ul>",
+    ].join("\n");
+    const r = parseContentHtml(html);
+    expect(r.examples.map((e) => e.images)).toEqual([
+      [{ url: "https://assets.leetcode.com/uploads/loop-a.png", alt: "", width: 300 }],
+      [{ url: "https://assets.leetcode.com/uploads/loop-b.png", alt: "", width: 141 }],
+      [],
+    ]);
+    expect(r.statement).not.toContain("loop-a");
+  });
+
+  it("attaches images inside a newer example-block to that example", () => {
+    const html =
+      '<p>Traverse the tree.</p><p><strong class="example">Example 1:</strong></p>' +
+      '<div class="example-block"><p><strong>Input:</strong> <span class="example-io">root = [1,null,2]</span></p>' +
+      '<p><strong>Output:</strong> <span class="example-io">[1,2]</span></p><p><strong>Explanation:</strong></p>' +
+      `<p>${img("tree", 200)}</p></div>`;
+    const [ex] = parseContentHtml(html).examples;
+    expect(ex.output).toBe("[1,2]");
+    expect(ex.images).toEqual([{ url: "https://assets.leetcode.com/uploads/tree.png", alt: "", width: 200 }]);
   });
 });
 
