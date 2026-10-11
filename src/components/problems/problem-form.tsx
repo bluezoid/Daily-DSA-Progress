@@ -83,6 +83,7 @@ export function ProblemForm({
     control,
     handleSubmit,
     setError,
+    getValues,
     formState: { errors, isSubmitting },
   } = useForm<ProblemFormValues>({ defaultValues: initial });
   const examples = useFieldArray({ control, name: "examples" });
@@ -320,7 +321,7 @@ export function ProblemForm({
             <div className="grid gap-3">
               <div className="flex items-center justify-between">
                 <Label>Examples</Label>
-                <Button type="button" size="sm" variant="outline" onClick={() => examples.append({ input: "", output: "", explanation: "" })}>
+                <Button type="button" size="sm" variant="outline" onClick={() => examples.append({ input: "", output: "", explanation: "", images: [] })}>
                   <Plus aria-hidden /> Add example
                 </Button>
               </div>
@@ -338,6 +339,31 @@ export function ProblemForm({
                     <Textarea aria-label={`Example ${i + 1} output`} placeholder="Output" rows={2} className="font-mono text-xs" {...register(`examples.${i}.output`)} />
                   </div>
                   <Textarea aria-label={`Example ${i + 1} explanation`} placeholder="Explanation (optional)" rows={2} {...register(`examples.${i}.explanation`)} />
+                  {(f.images ?? []).length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {f.images!.map((img) => (
+                        <div key={img.url} className="relative">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={img.url} alt={img.alt || `Example ${i + 1} illustration`} className="h-16 w-auto rounded border bg-white" referrerPolicy="no-referrer" />
+                          <Button
+                            type="button"
+                            size="icon"
+                            variant="secondary"
+                            className="absolute -top-2 -right-2 size-6 rounded-full"
+                            aria-label={`Remove image from example ${i + 1}`}
+                            onClick={() =>
+                              examples.update(i, {
+                                ...getValues(`examples.${i}`),
+                                images: (f.images ?? []).filter((x) => x.url !== img.url),
+                              })
+                            }
+                          >
+                            <Trash2 className="size-3" aria-hidden />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
