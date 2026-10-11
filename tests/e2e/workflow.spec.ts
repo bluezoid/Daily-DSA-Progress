@@ -141,6 +141,9 @@ test("full workflow: manual problem, solutions, revision, library, import, isola
   await page.getByRole("button", { name: "Save problem" }).click();
   await expect(page).toHaveURL(/\/problems\/[a-f0-9]{24}$/);
   await expect(page.getByText("2 <= values.length <= 10^5")).toBeVisible();
+  // The example's illustration renders inside "Example 1", before its input.
+  const example1 = page.getByText("Example 1", { exact: true }).locator("..");
+  await expect(example1.getByRole("img", { name: "Example one diagram" })).toBeVisible();
   await expect(page.getByText("Imported from LeetCode")).toBeVisible();
 
   // Importing again flags the duplicate.
