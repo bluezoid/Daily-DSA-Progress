@@ -50,12 +50,6 @@ export const topicsSchema = z
     });
   });
 
-export const exampleSchema = z.object({
-  input: z.string().max(5_000).default(""),
-  output: z.string().max(5_000).default(""),
-  explanation: z.string().max(5_000).default(""),
-});
-
 export const imageSchema = z.object({
   url: z
     .string()
@@ -68,6 +62,14 @@ export const imageSchema = z.object({
       }
     }, "Image URLs must use https"),
   alt: z.string().max(300).default(""),
+  width: z.number().int().min(1).max(2000).optional(),
+});
+
+export const exampleSchema = z.object({
+  input: z.string().max(5_000).default(""),
+  output: z.string().max(5_000).default(""),
+  explanation: z.string().max(5_000).default(""),
+  images: z.array(imageSchema).max(10).default([]),
 });
 
 const problemFields = {

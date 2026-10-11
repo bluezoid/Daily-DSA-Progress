@@ -20,15 +20,19 @@ export interface UserDoc {
   updatedAt: Date;
 }
 
+export interface ProblemImage {
+  url: string;
+  alt: string;
+  /** Display width in px from the source, when known. */
+  width?: number;
+}
+
 export interface ProblemExample {
   input: string;
   output: string;
   explanation: string;
-}
-
-export interface ProblemImage {
-  url: string;
-  alt: string;
+  /** Illustrations belonging to this example (absent on records saved before this field existed). */
+  images?: ProblemImage[];
 }
 
 export type StatementFormat = "markdown" | "html";
