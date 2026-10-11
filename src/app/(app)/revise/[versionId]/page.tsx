@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { PageSkeleton } from "@/components/common/skeletons";
 import { StatementView } from "@/components/common/statement-view";
+import { ExampleList } from "@/components/common/example-list";
 import { CodeBlock } from "@/components/common/code-block";
 import { DifficultyBadge, DueBadge, LanguageBadge, PriorityBadge } from "@/components/common/badges";
 import { RevisionWorkspace } from "@/components/revisions/revision-workspace";
@@ -54,13 +55,8 @@ async function Revise({ params, searchParams }: Props) {
           <p className="text-sm text-muted-foreground">No statement saved for this problem.</p>
         )}
         {p.examples.length > 0 && (
-          <div className="mt-4 grid gap-2">
-            {p.examples.map((ex, i) => (
-              <div key={i} className="rounded-lg border bg-muted/40 p-3 font-mono text-[13px]">
-                <p className="whitespace-pre-wrap"><span className="font-semibold">Input:</span> {ex.input}</p>
-                <p className="whitespace-pre-wrap"><span className="font-semibold">Output:</span> {ex.output}</p>
-              </div>
-            ))}
+          <div className="mt-4">
+            <ExampleList examples={p.examples} />
           </div>
         )}
         {p.constraints.length > 0 && (
