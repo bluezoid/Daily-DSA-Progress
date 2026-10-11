@@ -5,3 +5,4 @@
 - [Memory location preference](feedback-memory-location.md) — keep all project memory in ./.claude
 - [Project progress](project-progress.md) — phase-by-phase status log
 - [Next 16 gotchas](nextjs16-gotchas.md) — cacheComponents/Suspense, unstable_rethrow, client-module boundaries
+- [Git commit rules](feedback-git-commits.md) — small frequent commits, message only, no co-author trailer
