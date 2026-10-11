@@ -12,6 +12,7 @@ export const MOCK_QUESTION = {
     '<p><img alt="Diagram of the array" src="https://assets.leetcode.com/uploads/mock/diagram.png" style="width: 200px" /></p>',
     "<p>&nbsp;</p>",
     '<p><strong class="example">Example 1:</strong></p>',
+    '<img alt="Example one diagram" src="https://assets.leetcode.com/uploads/mock/example-1.png" style="width: 240px; height: 80px;" />',
     "<pre>\n<strong>Input:</strong> values = [1,4,6], goal = 10\n<strong>Output:</strong> [1,2]\n<strong>Explanation:</strong> values[1] + values[2] == 10.\n</pre>",
     '<p><strong class="example">Example 2:</strong></p>',
     '<div class="example-block"><p><strong>Input:</strong> <span class="example-io">values = [5,5], goal = 10</span></p><p><strong>Output:</strong> <span class="example-io">[0,1]</span></p></div>',

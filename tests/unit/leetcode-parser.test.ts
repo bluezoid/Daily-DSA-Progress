@@ -20,7 +20,7 @@ describe("parseQuestion", () => {
 
   it("extracts both <pre> and example-block examples", () => {
     expect(data.examples).toEqual([
-      { input: "values = [1,4,6], goal = 10", output: "[1,2]", explanation: "values[1] + values[2] == 10.", images: [] },
+      { input: "values = [1,4,6], goal = 10", output: "[1,2]", explanation: "values[1] + values[2] == 10.", images: [{ url: "https://assets.leetcode.com/uploads/mock/example-1.png", alt: "Example one diagram", width: 240 }] },
       { input: "values = [5,5], goal = 10", output: "[0,1]", explanation: "", images: [] },
     ]);
   });
@@ -38,7 +38,10 @@ describe("parseQuestion", () => {
   });
 
   it("collects allowed images with alt text", () => {
-    expect(data.images).toEqual([{ url: "https://assets.leetcode.com/uploads/mock/diagram.png", alt: "Diagram of the array", width: 200 }]);
+    expect(data.images).toEqual([
+      { url: "https://assets.leetcode.com/uploads/mock/diagram.png", alt: "Diagram of the array", width: 200 },
+      { url: "https://assets.leetcode.com/uploads/mock/example-1.png", alt: "Example one diagram", width: 240 },
+    ]);
     expect(data.statement).toContain("https://assets.leetcode.com/uploads/mock/diagram.png");
   });
 
